@@ -204,7 +204,7 @@ function ClientView() {
         <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-5 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
             <img
-              src={logo.url}
+              src="/logo.jpg"
               alt="Logotipo Cabaña y tinaja MH"
               className="h-10 w-10 shrink-0 rounded-full sm:h-12 sm:w-12"
             />
