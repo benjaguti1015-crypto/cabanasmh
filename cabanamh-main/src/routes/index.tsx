@@ -254,8 +254,8 @@ function ClientView() {
           <h2 className="flex items-center gap-2 text-hero text-2xl">
             <Info className="h-5 w-5 shrink-0 text-primary" /> Información y tarifas
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Valores por noche para 2 personas. Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs.
+          <p className="mt-1 text-ms font-medium text-muted-foreground">
+            Valores por noche. Capacidad maxima: 3 adultos o 2 adultosy 2 niños (en caso contrario, no se podrá arrendar la cabaña) Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
