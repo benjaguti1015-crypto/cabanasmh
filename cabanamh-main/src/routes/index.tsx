@@ -214,6 +214,8 @@ function ClientView() {
                 Cabaña · Tinaja · Naturaleza
               </p>
             </div>
+          </div>
+        </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-5 sm:py-10">
