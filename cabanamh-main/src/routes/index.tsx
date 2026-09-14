@@ -214,16 +214,6 @@ function ClientView() {
                 Cabaña · Tinaja · Naturaleza
               </p>
             </div>
-          </div>
-          <Link
-            to="/admin"
-            aria-label="Administrador"
-            className="flex shrink-0 items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-4"
-          >
-            <ShieldCheck className="h-4 w-4" />
-            <span className="hidden sm:inline">Administrador</span>
-          </Link>
-        </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-5 sm:py-10">
