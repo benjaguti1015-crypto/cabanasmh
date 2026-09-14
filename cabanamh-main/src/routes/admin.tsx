@@ -605,20 +605,42 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                     <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
                       {r.dates.map(formatDay).join(" · ")}
                     </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-4">
-                      <button
-                        onClick={() => startEdit(r)}
-                        className="flex items-center gap-2 text-xs text-primary hover:underline"
-                      >
-                        <Pencil className="h-3 w-3" /> Editar fechas
-                      </button>
-                      <button
-                        onClick={() => del(r.id)}
-                        className="flex items-center gap-2 text-xs text-destructive hover:underline"
-                      >
-                        <Trash2 className="h-3 w-3" /> Eliminar reserva
-                      </button>
-                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+  <div className="flex items-center gap-2">
+    <span className="text-xs font-medium text-muted-foreground">Pago:</span>
+    <select 
+      className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+      defaultValue="pendiente"
+    >
+      <option value="pendiente">Pendiente</option>
+      <option value="pagado">Pagado</option>
+    </select>
+  </div>
+
+  <a
+    href={`https://api.whatsapp.com/send?phone=${r.phone.replace(/[^0-9]/g, "")}&text=${encodeURIComponent(`Hola ${r.name}, te escribimos de Cabaña y tinaja MH para confirmar los detalles de tu reserva.`)}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+  >
+    <MessageCircle className="h-3.5 w-3.5 text-green-600" /> WhatsApp
+  </a>
+</div>
+
+<div className="mt-3 flex flex-wrap items-center gap-4">
+  <button
+    onClick={() => startEdit(r)}
+    className="flex items-center gap-2 text-xs text-primary hover:underline"
+  >
+    <Pencil className="h-3 w-3" /> Editar fechas
+  </button>
+  <button
+    onClick={() => del(r.id)}
+    className="flex items-center gap-2 text-xs text-destructive hover:underline"
+  >
+    <Trash2 className="h-3 w-3" /> Eliminar reserva
+  </button>
+</div>
                   </li>
                 ))}
               </ul>
