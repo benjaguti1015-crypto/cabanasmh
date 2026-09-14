@@ -11,7 +11,7 @@ export const BUSINESS_NAME = "Cabaña y tinaja MH";
 export type Rates = { weekday: number; weekend: number; holiday: number };
 export const DEFAULT_RATES: Rates = { weekday: 60000, weekend: 70000, holiday: 75000 };
 
-/** Adicional opcional: saco de leña para encender la tinaja. */
+/** Saco de leña obligatorio para encender la tinaja. Se paga en efectivo al llegar. */
 export const FIREWOOD_PRICE = 5000;
 
 export type Reservation = {

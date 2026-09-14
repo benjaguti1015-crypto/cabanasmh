@@ -86,7 +86,7 @@ const EXCLUDES = ["Cable de TV", "Toallas", "Secador de pelo"];
 function ClientView() {
   const { data, loading } = useCabinData();
   const [selected, setSelected] = useState<string[]>([]);
-  const [firewood, setFirewood] = useState(false);
+  const firewood = true;
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -102,8 +102,7 @@ function ClientView() {
     () => totalForDays(selected, rates, offers, holidays),
     [selected, rates, offers, holidays],
   );
-  const extras = firewood ? FIREWOOD_PRICE : 0;
-  const total = nightsTotal + extras;
+  const total = nightsTotal;
   const savings = useMemo(
     () =>
       selected.reduce(
@@ -179,9 +178,10 @@ function ClientView() {
       `Correo: ${form.email.trim()}%0A` +
       `Noches: ${nights}%0A` +
       `Fechas: ${dates.map(formatDay).join(", ")}%0A` +
-      `Saco de leña para la tinaja: ${firewood ? "Sí" : "No"}%0A` +
+      `Saco de leña para la tinaja: 1 saco obligatorio (${formatCLP(FIREWOOD_PRICE)}, se paga en efectivo al llegar a la cabaña)%0A` +
       `Check-in ${CHECK_IN} · Check-out ${CHECK_OUT}%0A` +
-      `Total: ${formatCLP(total)}`;
+      `Total reserva (pago online): ${formatCLP(total)}%0A` +
+      `Leña (efectivo al llegar, no incluida en el total): ${formatCLP(FIREWOOD_PRICE)}`;
 
     window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${detalle}`, "_blank");
 
@@ -193,7 +193,6 @@ function ClientView() {
     );
 
     setSelected([]);
-    setFirewood(false);
     setForm({ name: "", phone: "", email: "" });
     setDone(true);
     toast.success("¡Reserva confirmada! Te enviamos la confirmación por correo.");
@@ -281,10 +280,11 @@ function ClientView() {
             <p className="flex min-w-0 items-start gap-2 text-sm">
               <Flame className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>
-                <span className="font-medium">Saco de leña para la tinaja</span>
+                <span className="font-medium">1 saco de leña obligatorio para la tinaja</span>
                 <span className="block text-xs text-muted-foreground">
-                  La tinaja no tiene costo de arriendo. Con el saco la encendemos y calentamos el
-                  agua antes de tu llegada.
+                  La tinaja no tiene costo de arriendo. El saco es obligatorio: lo usamos para
+                  encenderla y calentar el agua antes de tu llegada. El valor se cancela en efectivo
+                  al momento de llegar a la cabaña; no se cobra en el pago online de la reserva.
                 </span>
               </span>
             </p>
@@ -367,19 +367,22 @@ function ClientView() {
               />
             </div>
 
-            <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-input bg-background px-4 py-3 text-sm transition-colors hover:bg-accent/40">
+            <label className="mt-4 flex cursor-not-allowed items-start gap-3 rounded-xl border border-input bg-background px-4 py-3 text-sm">
               <input
                 type="checkbox"
-                checked={firewood}
-                onChange={(e) => setFirewood(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                checked
+                disabled
+                readOnly
+                aria-disabled="true"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary disabled:opacity-100"
               />
               <span className="min-w-0">
                 <span className="font-medium">
-                  Agregar saco de leña · {formatCLP(FIREWOOD_PRICE)}
+                  1 saco de leña obligatorio · {formatCLP(FIREWOOD_PRICE)}
                 </span>
                 <span className="block text-xs text-muted-foreground">
-                  Dejamos la tinaja encendida y el agua caliente antes de tu llegada.
+                  Incluido en tu reserva. El valor se cancela en efectivo al momento de llegar a la
+                  cabaña; no se cobra en el pago online ni en el total de la reserva.
                 </span>
               </span>
             </label>
@@ -412,23 +415,27 @@ function ClientView() {
                       </li>
                     );
                   })}
-                  {firewood && (
-                    <li className="flex justify-between gap-2">
-                      <span>Saco de leña</span>
-                      <span className="shrink-0">{formatCLP(FIREWOOD_PRICE)}</span>
-                    </li>
-                  )}
                 </ul>
               )}
+              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                <li className="flex justify-between gap-2">
+                  <span>Saco de leña (efectivo al llegar)</span>
+                  <span className="shrink-0">{formatCLP(FIREWOOD_PRICE)}</span>
+                </li>
+              </ul>
               {savings > 0 && (
                 <p className="mt-2 text-xs text-primary">
                   Ahorras {formatCLP(savings)} con las noches en oferta.
                 </p>
               )}
               <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-border pt-3">
-                <span className="font-medium">Total</span>
+                <span className="font-medium">Total a pagar online</span>
                 <span className="text-hero shrink-0 text-2xl">{formatCLP(total)}</span>
               </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                El saco de leña ({formatCLP(FIREWOOD_PRICE)}) se cancela en efectivo al llegar a la
+                cabaña y no está incluido en este total.
+              </p>
             </div>
 
             <button

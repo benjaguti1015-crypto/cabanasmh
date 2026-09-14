@@ -378,8 +378,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               feriados {formatCLP(rates.holiday)}
             </span>
             <p className="w-full text-xs text-muted-foreground">
-              Adicional para el cliente: saco de leña {formatCLP(FIREWOOD_PRICE)} (la tinaja no
-              tiene costo de arriendo).
+              Adicional obligatorio: 1 saco de leña {formatCLP(FIREWOOD_PRICE)}, se cancela en
+              efectivo al llegar a la cabaña (no se incluye en el total de la reserva).
             </p>
           </form>
         </section>
@@ -593,7 +593,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                         >
                           <Flame className="h-3 w-3 shrink-0" />
                           {r.firewood
-                            ? `Saco de leña · ${formatCLP(FIREWOOD_PRICE)}`
+                            ? `Saco de leña · ${formatCLP(FIREWOOD_PRICE)} en efectivo al llegar`
                             : "Sin leña adicional"}
                         </p>
                       </div>
