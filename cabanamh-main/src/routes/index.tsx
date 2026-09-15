@@ -91,6 +91,9 @@ function ClientView() {
   const [adults, setAdults] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
 
+  // Estado para términos y condiciones
+  const [acceptTerms, setAcceptTerms] = useState(false);
+
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -149,6 +152,11 @@ function ClientView() {
 
     if (esInvalido) {
       toast.error("Capacidad máxima: 3 adultos o 2 adultos y 2 niños. En caso contrario, no se podrá arrendar.");
+      return;
+    }
+
+    if (!acceptTerms) {
+      toast.error("Debes aceptar los términos y condiciones para continuar.");
       return;
     }
 
@@ -213,6 +221,7 @@ function ClientView() {
     setForm({ name: "", phone: "", email: "" });
     setAdults(1);
     setChildrenCount(0);
+    setAcceptTerms(false);
     setDone(true);
     toast.success("¡Reserva confirmada! Te enviamos la confirmación por correo.");
   };
@@ -425,6 +434,33 @@ function ClientView() {
                 </span>
               </span>
             </label>
+
+            {/* Sección de Términos y Condiciones */}
+            <div className="mt-4 rounded-xl border border-border bg-background p-4 text-xs">
+              <div className="font-medium text-foreground mb-2">Términos y condiciones de la estadía:</div>
+              <ul className="list-disc pl-4 space-y-1.5 text-muted-foreground mb-3 max-h-40 overflow-y-auto">
+                <li><strong className="text-foreground">Prohibido fumar</strong> al interior de la cabaña.</li>
+                <li><strong className="text-foreground">Prohibido traer animales.</strong></li>
+                <li><strong className="text-foreground">Prohibido música a un volumen alto</strong> después de las 22:00 hrs.</li>
+                <li><strong className="text-foreground">Prohibido ingreso de personas no alojadas</strong> a la cabaña.</li>
+                <li><strong className="text-foreground">Prohibido arrojar comida o alcohol</strong> dentro de la tinaja.</li>
+                <li><strong className="text-foreground">Prohibido llevarse algún artículo</strong> de la cabaña.</li>
+                <li><strong className="text-foreground">Prohibido orinar</strong> dentro de la tinaja.</li>
+                <li>Hacer <strong className="text-foreground">buen uso del agua</strong>.</li>
+                <li><strong className="text-foreground">No se hace devolución de dinero</strong> por cancelación de estadía; no obstante, se puede reagendar sin problemas avisando con 10 días de anticipación.</li>
+                <li>Al transferir o confirmar, <strong className="text-foreground">usted está aceptando estas condiciones</strong>.</li>
+              </ul>
+
+              <label className="flex items-center gap-2 cursor-pointer pt-2 border-t border-border font-medium text-foreground">
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="h-4 w-4 rounded border-input accent-primary"
+                />
+                <span>Acepto los términos y condiciones</span>
+              </label>
+            </div>
 
             <div className="mt-6 rounded-xl bg-secondary p-4 text-sm">
               <div className="flex justify-between text-muted-foreground">
