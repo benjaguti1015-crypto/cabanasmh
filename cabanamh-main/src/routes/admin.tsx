@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import logo from "@/assets/logo-mh.jpg.asset.json";
+import logo from "../assets/logo.jpg";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import {
   addExpense,
@@ -98,7 +98,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-soft sm:p-8">
-        <img src={logo.url} alt="Logotipo MH" className="mx-auto h-16 w-16 rounded-full" />
+        <img src={logo} alt="Logotipo MH" className="mx-auto h-16 w-16 rounded-full object-cover" />
         <h1 className="mt-4 text-center text-hero text-2xl">Acceso administrador</h1>
         <p className="mt-1 text-center text-xs text-muted-foreground">{BUSINESS_NAME}</p>
 
@@ -109,7 +109,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
             placeholder="Correo"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm"
+            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm text-foreground"
           />
           <input
             type="password"
@@ -117,7 +117,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm"
+            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm text-foreground"
           />
         </div>
 
@@ -291,7 +291,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       <header className="border-b border-border bg-card/70 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
-            <img src={logo.url} alt="Logotipo MH" className="h-10 w-10 shrink-0 rounded-full" />
+            <img src={logo} alt="Logotipo MH" className="h-10 w-10 shrink-0 rounded-full object-cover" />
             <div className="min-w-0">
               <p className="text-hero truncate text-base leading-tight sm:text-lg">Panel de administración</p>
               <p className="truncate text-xs text-muted-foreground">{BUSINESS_NAME}</p>
@@ -483,7 +483,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                   onChange={(e) => setOfferInput(e.target.value.replace(/[^0-9]/g, ""))}
                   inputMode="numeric"
                   placeholder="Precio de oferta"
-                  className="w-40 rounded-xl border border-input bg-background px-4 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm"
+                  className="w-40 rounded-xl border border-input bg-background px-4 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm text-foreground"
                 />
               )}
             </div>
@@ -583,6 +583,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                         <p className="mt-1 flex items-center gap-2 break-all text-xs text-muted-foreground">
                           <Mail className="h-3 w-3 shrink-0" /> {r.email}
                         </p>
+                        {/* Indicador de adultos y niños */}
+                        <p className="mt-1 text-xs font-medium text-primary">
+                          👥 Pasajeros: {(r as any).adults ?? 1} adulto{((r as any).adults ?? 1) > 1 ? "s" : ""} {(r as any).children !== undefined ? `· ${(r as any).children} niño${(r as any).children > 1 ? "s" : ""}` : ""}
+                        </p>
                         <p
                           className={[
                             "mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium",
@@ -606,41 +610,41 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                       {r.dates.map(formatDay).join(" · ")}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-  <div className="flex items-center gap-2">
-    <span className="text-xs font-medium text-muted-foreground">Pago:</span>
-    <select 
-      className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
-      defaultValue="pendiente"
-    >
-      <option value="pendiente">Pendiente</option>
-      <option value="pagado">Pagado</option>
-    </select>
-  </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-muted-foreground">Pago:</span>
+                        <select 
+                          className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          defaultValue="pendiente"
+                        >
+                          <option value="pendiente">Pendiente</option>
+                          <option value="pagado">Pagado</option>
+                        </select>
+                      </div>
 
-  <a
-    href={`https://api.whatsapp.com/send?phone=${r.phone.replace(/[^0-9]/g, "")}&text=${encodeURIComponent(`Hola ${r.name}, te escribimos de Cabaña y tinaja MH para confirmar los detalles de tu reserva.`)}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-  >
-    <MessageCircle className="h-3.5 w-3.5 text-green-600" /> WhatsApp
-  </a>
-</div>
+                      <a
+                        href={`https://api.whatsapp.com/send?phone=${r.phone.replace(/[^0-9]/g, "")}&text=${encodeURIComponent(`Hola ${r.name}, te escribimos de Cabaña y tinaja MH para confirmar los detalles de tu reserva.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5 text-green-600" /> WhatsApp
+                      </a>
+                    </div>
 
-<div className="mt-3 flex flex-wrap items-center gap-4">
-  <button
-    onClick={() => startEdit(r)}
-    className="flex items-center gap-2 text-xs text-primary hover:underline"
-  >
-    <Pencil className="h-3 w-3" /> Editar fechas
-  </button>
-  <button
-    onClick={() => del(r.id)}
-    className="flex items-center gap-2 text-xs text-destructive hover:underline"
-  >
-    <Trash2 className="h-3 w-3" /> Eliminar reserva
-  </button>
-</div>
+                    <div className="mt-3 flex flex-wrap items-center gap-4">
+                      <button
+                        onClick={() => startEdit(r)}
+                        className="flex items-center gap-2 text-xs text-primary hover:underline"
+                      >
+                        <Pencil className="h-3 w-3" /> Editar fechas
+                      </button>
+                      <button
+                        onClick={() => del(r.id)}
+                        className="flex items-center gap-2 text-xs text-destructive hover:underline"
+                      >
+                        <Trash2 className="h-3 w-3" /> Eliminar reserva
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -829,14 +833,14 @@ function Finance({
             onChange={(e) => setConcept(e.target.value)}
             maxLength={60}
             placeholder="Concepto (ej: mantención tinaja)"
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm"
+            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm text-foreground"
           />
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
             inputMode="numeric"
             placeholder="Monto en CLP"
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm"
+            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ring sm:text-sm text-foreground"
           />
           <button
             type="submit"

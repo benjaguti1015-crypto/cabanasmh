@@ -223,7 +223,7 @@ function ClientView() {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
             <img 
-              src="/logo-mh.jpg" 
+              src="/logo.jpg" 
               alt="Logotipo Cabaña y tinaja MH" 
               className="h-10 w-10 shrink-0 rounded-full sm:h-12 sm:w-12 object-cover" 
             />
