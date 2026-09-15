@@ -27,7 +27,6 @@ import emailjs from "@emailjs/browser";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { createReservation, useCabinData } from "@/lib/cloud";
 import {
-  ADMIN_EMAIL,
   BUSINESS_NAME,
   CHECK_IN,
   CHECK_OUT,
@@ -196,7 +195,7 @@ function ClientView() {
       return;
     }
 
-    // --- ENVÍO DE CORREO AUTOMÁTICO CON EMAILJS ---
+    // --- 1. ENVÍO DE CORREO AUTOMÁTICO AL CLIENTE (EmailJS) ---
     try {
       await emailjs.send(
         'service_9gb8cmf',
@@ -211,45 +210,26 @@ function ClientView() {
         'ePdaz67F06AKh8qyp'
       );
     } catch (err) {
-      console.error("Error al enviar correo automático:", err);
+      console.error("Error al enviar correo automático al cliente:", err);
     }
-   try {
-    await emailjs.send(
-      'service_9gb8cmf',
-      'template_syzww2u', // Reemplaza aquí con el ID de la segunda plantilla que creaste recién
-      {
-        client_name: form.name.trim(),
-        client_phone: form.phone.trim(),
-        passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
-        dates: dates.map(formatDay).join(", "),
-        total: formatCLP(total),
-      },
-      'ePdaz67F06AKh8qyp'
-    );
-  } catch (err) {
-    console.error("Error al enviar notificación al dueño:", err);
-  }
-    const detalle =
-      `Nueva reserva en ${BUSINESS_NAME}%0A%0A` +
-      `Cliente: ${form.name.trim()}%0A` +
-      `Teléfono: ${form.phone.trim()}%0A` +
-      `Correo: ${form.email.trim()}%0A` +
-      `Pasajeros: ${adults} adulto(s), ${childrenCount} niño(s)%0A` +
-      `Noches: ${nights}%0A` +
-      `Fechas: ${dates.map(formatDay).join(", ")}%0A` +
-      `Saco de leña para la tinaja: 1 saco obligatorio (${formatCLP(FIREWOOD_PRICE)}, se paga en efectivo al llegar a la cabaña)%0A` +
-      `Check-in ${CHECK_IN} · Check-out ${CHECK_OUT}%0A` +
-      `Total reserva (pago online): ${formatCLP(total)}%0A` +
-      `Leña (efectivo al llegar, no incluida en el total): ${formatCLP(FIREWOOD_PRICE)}`;
 
-    window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${detalle}`, "_blank");
-
-    const body = detalle.replace(/%0A/g, "\n");
-    window.open(
-      `mailto:${form.email.trim()}?cc=${ADMIN_EMAIL}&subject=${encodeURIComponent(
-        `Confirmación de reserva — ${BUSINESS_NAME}`,
-      )}&body=${encodeURIComponent(body)}`,
-    );
+    // --- 2. ENVÍO DE NOTIFICACIÓN AUTOMÁTICA AL DUEÑO (EmailJS) ---
+    try {
+      await emailjs.send(
+        'service_9gb8cmf',
+        'template_syzww2u',
+        {
+          client_name: form.name.trim(),
+          client_phone: form.phone.trim(),
+          passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
+          dates: dates.map(formatDay).join(", "),
+          total: formatCLP(total),
+        },
+        'ePdaz67F06AKh8qyp'
+      );
+    } catch (err) {
+      console.error("Error al enviar notificación al dueño:", err);
+    }
 
     setSelected([]);
     setForm({ name: "", phone: "", email: "" });
@@ -257,7 +237,7 @@ function ClientView() {
     setChildrenCount(0);
     setAcceptTerms(false);
     setDone(true);
-    toast.success("¡Reserva confirmada! Te enviamos la confirmación por correo.");
+    toast.success("¡Reserva solicitada con éxito! Revisa tu correo.");
   };
 
   return (
@@ -543,7 +523,7 @@ function ClientView() {
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 El saco de leña ({formatCLP(FIREWOOD_PRICE)}) se cancela en efectivo al llegar a la
-                cabaña y não está incluido en este total.
+                cabaña y no está incluido en este total.
               </p>
             </div>
 
@@ -557,10 +537,19 @@ function ClientView() {
             </button>
 
             {done && (
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Se abrió WhatsApp con el aviso al dueño y el correo de confirmación con copia al
-                administrador.
-              </p>
+              <div className="mt-4 rounded-xl border border-primary/40 bg-secondary p-4 text-center space-y-3">
+                <p className="text-sm font-medium text-foreground">
+                  ¡Reserva solicitada con éxito! Te hemos enviado un correo con las instrucciones de transferencia.
+                </p>
+                <a
+                  href={`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(`Hola, acabo de solicitar una reserva en Cabaña y tinaja MH. ¡Quedo atento!`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-green-600 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
+                >
+                  <MessageCircle className="h-4 w-4" /> Avisar al dueño por WhatsApp (Opcional)
+                </a>
+              </div>
             )}
           </form>
         </div>
