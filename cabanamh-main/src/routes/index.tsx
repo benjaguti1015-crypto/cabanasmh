@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Bath,
@@ -13,7 +13,6 @@ import {
   Mail,
   MessageCircle,
   Phone,
-  ShieldCheck,
   ShowerHead,
   Sparkles,
   Tv,
@@ -24,7 +23,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import logo from "@/assets/logo-mh.jpg.asset.json";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { createReservation, useCabinData } from "@/lib/cloud";
 import {
@@ -88,6 +86,11 @@ function ClientView() {
   const [selected, setSelected] = useState<string[]>([]);
   const firewood = true;
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
+  
+  // Estados para la capacidad de pasajeros
+  const [adults, setAdults] = useState(1);
+  const [childrenCount, setChildrenCount] = useState(0);
+
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -136,6 +139,19 @@ function ClientView() {
   const confirm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (sending) return;
+
+    // Validación estricta de capacidad máxima exigida por el dueño
+    const esInvalido =
+      adults > 3 ||
+      childrenCount > 2 ||
+      (adults === 3 && childrenCount > 0) ||
+      adults + childrenCount > 4;
+
+    if (esInvalido) {
+      toast.error("Capacidad máxima: 3 adultos o 2 adultos y 2 niños. En caso contrario, no se podrá arrendar.");
+      return;
+    }
+
     if (!nights) {
       toast.error("Selecciona al menos una noche.");
       return;
@@ -176,6 +192,7 @@ function ClientView() {
       `Cliente: ${form.name.trim()}%0A` +
       `Teléfono: ${form.phone.trim()}%0A` +
       `Correo: ${form.email.trim()}%0A` +
+      `Pasajeros: ${adults} adulto(s), ${childrenCount} niño(s)%0A` +
       `Noches: ${nights}%0A` +
       `Fechas: ${dates.map(formatDay).join(", ")}%0A` +
       `Saco de leña para la tinaja: 1 saco obligatorio (${formatCLP(FIREWOOD_PRICE)}, se paga en efectivo al llegar a la cabaña)%0A` +
@@ -194,6 +211,8 @@ function ClientView() {
 
     setSelected([]);
     setForm({ name: "", phone: "", email: "" });
+    setAdults(1);
+    setChildrenCount(0);
     setDone(true);
     toast.success("¡Reserva confirmada! Te enviamos la confirmación por correo.");
   };
@@ -201,15 +220,15 @@ function ClientView() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/70 backdrop-blur">
-        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-5 sm:py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
-            <img
-              src="/logo.jpg"
-              alt="Logotipo Cabaña y tinaja MH"
-              className="h-10 w-10 shrink-0 rounded-full sm:h-12 sm:w-12"
+            <img 
+              src="/logo-mh.jpg" 
+              alt="Logotipo Cabaña y tinaja MH" 
+              className="h-10 w-10 shrink-0 rounded-full sm:h-12 sm:w-12 object-cover" 
             />
             <div className="min-w-0">
-              <p className="text-hero truncate text-base leading-tight sm:text-xl">{BUSINESS_NAME}</p>
+              <p className="text-hero truncate text-base leading-tight">Cabaña y tinaja MH</p>
               <p className="truncate text-[10px] uppercase tracking-[0.2em] text-muted-foreground sm:text-xs">
                 Cabaña · Tinaja · Naturaleza
               </p>
@@ -246,8 +265,8 @@ function ClientView() {
           <h2 className="flex items-center gap-2 text-hero text-2xl">
             <Info className="h-5 w-5 shrink-0 text-primary" /> Información y tarifas
           </h2>
-          <p className="mt-1 text-ms font-medium text-muted-foreground">
-            Valores por noche. Capacidad maxima: 3 adultos o 2 adultosy 2 niños (en caso contrario, no se podrá arrendar la cabaña) Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs.
+          <p className="mt-1 text-sm font-medium text-muted-foreground">
+            Valores por noche. Capacidad máxima: 3 adultos o 2 adultos y 2 niños (en caso contrario, no se podrá arrendar la cabaña). Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -276,7 +295,7 @@ function ClientView() {
                 <span className="block text-xs text-muted-foreground">
                   La tinaja no tiene costo de arriendo. El saco es obligatorio: lo usamos para
                   encenderla y calentar el agua antes de tu llegada. El valor se cancela en efectivo
-                  al momento de llegar a la cabaña; no se cobra en el pago online de la reserva.
+                  al llegar a la cabaña; no se cobra en el pago online de la reserva.
                 </span>
               </span>
             </p>
@@ -336,7 +355,35 @@ function ClientView() {
           >
             <h2 className="text-hero text-2xl">Tus datos</h2>
 
-            <div className="mt-4 space-y-3">
+            {/* Selectores de cantidad de pasajeros */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Adultos (máx. 3)</label>
+                <select
+                  value={adults}
+                  onChange={(e) => setAdults(Number(e.target.value))}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring text-foreground"
+                >
+                  <option value={1}>1 adulto</option>
+                  <option value={2}>2 adultos</option>
+                  <option value={3}>3 adultos</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Niños (máx. 2)</label>
+                <select
+                  value={childrenCount}
+                  onChange={(e) => setChildrenCount(Number(e.target.value))}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring text-foreground"
+                >
+                  <option value={0}>0 niños</option>
+                  <option value={1}>1 niño</option>
+                  <option value={2}>2 niños</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-3 space-y-3">
               <Field
                 icon={<User className="h-4 w-4" />}
                 placeholder="Nombre y apellido"
@@ -510,7 +557,7 @@ function Field({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground sm:text-sm"
+        className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground sm:text-sm text-foreground"
       />
     </label>
   );
