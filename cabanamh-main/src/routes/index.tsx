@@ -213,7 +213,22 @@ function ClientView() {
     } catch (err) {
       console.error("Error al enviar correo automático:", err);
     }
-
+   try {
+    await emailjs.send(
+      'service_9gb8cmf',
+      'template_syzww2u', // Reemplaza aquí con el ID de la segunda plantilla que creaste recién
+      {
+        client_name: form.name.trim(),
+        client_phone: form.phone.trim(),
+        passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
+        dates: dates.map(formatDay).join(", "),
+        total: formatCLP(total),
+      },
+      'ePdaz67F06AKh8qyp'
+    );
+  } catch (err) {
+    console.error("Error al enviar notificación al dueño:", err);
+  }
     const detalle =
       `Nueva reserva en ${BUSINESS_NAME}%0A%0A` +
       `Cliente: ${form.name.trim()}%0A` +
