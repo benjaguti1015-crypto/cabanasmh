@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import emailjs from "@emailjs/browser";
 
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { createReservation, useCabinData } from "@/lib/cloud";
@@ -193,6 +194,24 @@ function ClientView() {
     if (result.error) {
       toast.error("No pudimos guardar la reserva. Intenta de nuevo.");
       return;
+    }
+
+    // --- ENVÍO DE CORREO AUTOMÁTICO CON EMAILJS ---
+    try {
+      await emailjs.send(
+        'service_9gb8cmf',
+        'template_m4c2g45',
+        {
+          client_name: form.name.trim(),
+          client_email: form.email.trim(),
+          dates: dates.map(formatDay).join(", "),
+          passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
+          total: formatCLP(total),
+        },
+        'ePdaz67F06AKh8qyp'
+      );
+    } catch (err) {
+      console.error("Error al enviar correo automático:", err);
     }
 
     const detalle =
@@ -509,7 +528,7 @@ function ClientView() {
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 El saco de leña ({formatCLP(FIREWOOD_PRICE)}) se cancela en efectivo al llegar a la
-                cabaña y no está incluido en este total.
+                cabaña y não está incluido en este total.
               </p>
             </div>
 
