@@ -380,7 +380,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             </span>
             <p className="w-full text-xs text-muted-foreground">
               Adicional obligatorio: 1 saco de leña {formatCLP(FIREWOOD_PRICE)}, se cancela en
-              efectivo al llegar a la cabaña (no se incluye en el total de la reserva).
+              efectivo al llegar al lugar (no se incluye en el total de la reserva).
             </p>
           </form>
         </section>
@@ -584,7 +584,6 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                         <p className="mt-1 flex items-center gap-2 break-all text-xs text-muted-foreground">
                           <Mail className="h-3 w-3 shrink-0" /> {r.email}
                         </p>
-                        {/* Indicador de adultos y niños */}
                         <p className="mt-1 text-xs font-medium text-primary">
                           👥 Pasajeros: {(r as any).adults ?? 1} adulto{((r as any).adults ?? 1) > 1 ? "s" : ""} {(r as any).children !== undefined ? `· ${(r as any).children} niño${(r as any).children > 1 ? "s" : ""}` : ""}
                         </p>
@@ -613,7 +612,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-medium text-muted-foreground">Pago:</span>
-                        <select 
+                        <select
                           className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
                           value={(r as any).status || "pendiente"}
                           onChange={async (e) => {

@@ -156,6 +156,7 @@ export async function createReservation(input: {
       nights: input.dates.length,
       total: input.total,
       firewood: input.firewood,
+      status: "pendiente", // Asigna el estado inicial por defecto
     })
     .select("id")
     .single();
@@ -178,6 +179,10 @@ export async function updateReservationStatus(id: string, status: "pendiente" | 
   const { error } = await (supabase.from("reservations") as any)
     .update({ status })
     .eq("id", id);
+  
+  if (error) {
+    console.error("Error al actualizar estado en Supabase:", error);
+  }
   return !error;
 }
 
