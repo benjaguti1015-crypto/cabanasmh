@@ -162,8 +162,8 @@ export async function createReservation(input: {
     .single();
 
   if (error) {
-    console.error("Error detallado de Supabase:", error);
-    return { error: "failed" as const };
+      console.error("MENSAJE REAL DE SUPABASE:", error.message, error.details, error.hint);
+      return { error: "failed" as const };
   }
   return { id: data.id };
 }
