@@ -156,15 +156,16 @@ export async function createReservation(input: {
       nights: input.dates.length,
       total: input.total,
       firewood: input.firewood,
-      status: "pendiente",
     })
     .select("id")
     .single();
 
-  if (error) return { error: "failed" as const };
+  if (error) {
+    console.error("Error detallado de Supabase:", error);
+    return { error: "failed" as const };
+  }
   return { id: data.id };
 }
-
 export async function updateReservationDates(id: string, dates: string[], total: number) {
   const { error } = await supabase
     .from("reservations")
