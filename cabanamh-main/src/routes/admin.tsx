@@ -617,11 +617,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                           value={(r as any).status || "pendiente"}
                           onChange={async (e) => {
                             const newStatus = e.target.value as "pendiente" | "pagado";
+                            console.log("Intentando actualizar reserva ID:", r.id, "a estado:", newStatus);
                             const ok = await updateReservationStatus(r.id, newStatus);
                             if (ok) {
                               toast.success(`Estado actualizado a: ${newStatus}`);
                               await reload();
                             } else {
+                              console.error("Fallo al actualizar en cloud. Revisa Supabase.");
                               toast.error("No se pudo actualizar el estado de pago.");
                             }
                           }}
