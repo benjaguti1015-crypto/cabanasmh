@@ -156,23 +156,15 @@ export async function createReservation(input: {
       nights: input.dates.length,
       total: input.total,
       firewood: input.firewood,
-      status: "pendiente",
     })
     .select("id")
     .single();
 
   if (error) {
-      console.error("MENSAJE REAL DE SUPABASE:", error.message, error.details, error.hint);
-      return { error: "failed" as const };
+    console.error("Error al crear reserva:", error);
+    return { error: "failed" as const };
   }
   return { id: data.id };
-}
-export async function updateReservationDates(id: string, dates: string[], total: number) {
-  const { error } = await supabase
-    .from("reservations")
-    .update({ dates, nights: dates.length, total })
-    .eq("id", id);
-  return !error;
 }
 
 export async function updateReservationStatus(id: string, status: "pendiente" | "pagado") {
