@@ -167,6 +167,13 @@ export async function createReservation(input: {
   return { id: data.id };
 }
 
+export async function updateReservationDates(id: string, dates: string[], total: number) {
+  const { error } = await (supabase.from("reservations") as any)
+    .update({ dates, nights: dates.length, total })
+    .eq("id", id);
+  return !error;
+}
+
 export async function updateReservationStatus(id: string, status: "pendiente" | "pagado") {
   const { error } = await (supabase.from("reservations") as any)
     .update({ status })
