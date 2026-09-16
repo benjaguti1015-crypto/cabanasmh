@@ -156,6 +156,7 @@ export async function createReservation(input: {
       nights: input.dates.length,
       total: input.total,
       firewood: input.firewood,
+      status: "pendiente",
     })
     .select("id")
     .single();
