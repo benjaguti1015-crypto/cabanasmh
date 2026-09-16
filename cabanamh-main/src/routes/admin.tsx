@@ -34,6 +34,7 @@ import {
   setHolidayDays,
   setOfferDays,
   updateReservationDates,
+  updateReservationStatus,
   useCabinData,
   type CabinData,
 } from "@/lib/cloud";
@@ -614,7 +615,17 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                         <span className="text-xs font-medium text-muted-foreground">Pago:</span>
                         <select 
                           className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
-                          defaultValue="pendiente"
+                          value={(r as any).status || "pendiente"}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value as "pendiente" | "pagado";
+                            const ok = await updateReservationStatus(r.id, newStatus);
+                            if (ok) {
+                              toast.success(`Estado actualizado a: ${newStatus}`);
+                              await reload();
+                            } else {
+                              toast.error("No se pudo actualizar el estado de pago.");
+                            }
+                          }}
                         >
                           <option value="pendiente">Pendiente</option>
                           <option value="pagado">Pagado</option>

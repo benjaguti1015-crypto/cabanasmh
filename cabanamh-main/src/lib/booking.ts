@@ -2,8 +2,8 @@ export const CHECK_IN = "16:00";
 export const CHECK_OUT = "14:00";
 
 /** Datos del negocio. Teléfono del dueño en formato internacional, sin +. */
-export const OWNER_WHATSAPP = "56949424791";
-export const ADMIN_EMAIL = "benjaguti1015@gmail.com";
+export const OWNER_WHATSAPP = "56981443440";
+export const ADMIN_EMAIL = "cabanamh27@gmail.com";
 export const ADMIN_PASSWORD = "nacho1234";
 export const BUSINESS_NAME = "Cabaña y tinaja MH";
 
@@ -24,6 +24,9 @@ export type Reservation = {
   total: number;
   firewood: boolean;
   createdAt: string;
+  adults?: number;
+  children?: number;
+  status?: "pendiente" | "pagado"; // Estado de pago para bloquear el calendario
 };
 
 export type Expense = {
@@ -95,7 +98,11 @@ export const totalForDays = (
   holidays: string[] = [],
 ) => days.reduce((sum, d) => sum + priceForDay(d, rates, offers, holidays), 0);
 
-export const bookedDays = (list: Reservation[]) => list.flatMap((r) => r.dates);
+/** Las fechas solo se bloquean en el calendario público si la reserva está pagada */
+export const bookedDays = (list: Reservation[]) =>
+  list
+    .filter((r) => (r.status ?? "pendiente") === "pagado")
+    .flatMap((r) => r.dates);
 
 /** Rango del período actual: semana (lunes a domingo) o mes en curso. */
 export const periodRange = (period: "week" | "month", ref: Date = new Date()) => {
@@ -113,16 +120,18 @@ export const periodRange = (period: "week" | "month", ref: Date = new Date()) =>
 export const inRange = (day: string, range: { start: string; end: string }) =>
   day >= range.start && day <= range.end;
 
-/** Ingresos del período: reparte el total de cada reserva entre sus noches. */
+/** Ingresos del período: reparte el total de cada reserva entre sus noches (solo considera pagadas para finanzas reales o todas según prefieras). */
 export const incomeInRange = (
   list: Reservation[],
   range: { start: string; end: string },
 ) =>
-  list.reduce(
-    (sum, r) =>
-      sum + r.dates.filter((d) => inRange(d, range)).length * (r.total / (r.nights || 1)),
-    0,
-  );
+  list
+    .filter((r) => (r.status ?? "pendiente") === "pagado")
+    .reduce(
+      (sum, r) =>
+        sum + r.dates.filter((d) => inRange(d, range)).length * (r.total / (r.nights || 1)),
+      0,
+    );
 
 export const expensesInRange = (list: Expense[], range: { start: string; end: string }) =>
   list.filter((e) => inRange(e.date, range)).reduce((s, e) => s + e.amount, 0);

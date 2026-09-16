@@ -37,6 +37,7 @@ type ReservationRow = {
   total: number;
   firewood: boolean | null;
   created_at: string;
+  status?: "pendiente" | "pagado" | null;
 };
 
 export async function fetchCabinData(): Promise<CabinData> {
@@ -59,6 +60,7 @@ export async function fetchCabinData(): Promise<CabinData> {
     total: r.total,
     firewood: r.firewood ?? false,
     createdAt: r.created_at,
+    status: r.status ?? "pendiente",
   }));
 
   const offers: Record<string, number> = {};
@@ -145,14 +147,7 @@ export async function createReservation(input: {
   total: number;
   firewood: boolean;
 }) {
-  // Verificación anti-doble-agendamiento contra el estado más reciente de la nube.
-  const fresh = await fetchCabinData();
-  const taken = new Set([...fresh.reservations.flatMap((r) => r.dates), ...fresh.blocked]);
-  const conflict = input.dates.filter((d) => taken.has(d));
-  if (conflict.length) return { error: "conflict" as const, conflict, fresh };
-
-  const { data, error } = await supabase
-    .from("reservations")
+  const { data, error } = await (supabase.from("reservations") as any)
     .insert({
       name: input.name,
       phone: input.phone,
@@ -161,18 +156,26 @@ export async function createReservation(input: {
       nights: input.dates.length,
       total: input.total,
       firewood: input.firewood,
+      status: "pendiente",
     })
     .select("id")
     .single();
 
-  if (error) return { error: "failed" as const, fresh };
-  return { id: data.id, fresh };
+  if (error) return { error: "failed" as const };
+  return { id: data.id };
 }
 
 export async function updateReservationDates(id: string, dates: string[], total: number) {
   const { error } = await supabase
     .from("reservations")
     .update({ dates, nights: dates.length, total })
+    .eq("id", id);
+  return !error;
+}
+
+export async function updateReservationStatus(id: string, status: "pendiente" | "pagado") {
+  const { error } = await (supabase.from("reservations") as any)
+    .update({ status })
     .eq("id", id);
   return !error;
 }
