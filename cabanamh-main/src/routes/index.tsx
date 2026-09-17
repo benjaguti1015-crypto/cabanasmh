@@ -108,7 +108,11 @@ function ClientView() {
     () => totalForDays(selected, rates, offers, holidays),
     [selected, rates, offers, holidays],
   );
-  const total = nightsTotal;
+  
+  // Recargo de 10.000 si son 3 adultos
+  const adultExtra = adults === 3 ? 10000 : 0;
+  const total = nightsTotal + adultExtra;
+
   const savings = useMemo(
     () =>
       selected.reduce(
@@ -289,7 +293,7 @@ function ClientView() {
             <Info className="h-5 w-5 shrink-0 text-primary" /> Información y tarifas
           </h2>
           <p className="mt-1 text-sm font-medium text-muted-foreground">
-            Valores por noche. Capacidad máxima: 3 adultos o 2 adultos y 2 niños (en caso contrario, no se podrá arrendar la cabaña). Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs.
+            Valores por noche. Capacidad máxima: 3 adultos o 2 adultos y 2 niños (en caso contrario, no se podrá arrendar la cabaña). Para 3 adultos se aplica un cargo adicional de $10.000. Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -389,7 +393,7 @@ function ClientView() {
                 >
                   <option value={1}>1 adulto</option>
                   <option value={2}>2 adultos</option>
-                  <option value={3}>3 adultos</option>
+                  <option value={3}>3 adultos (+$10.000)</option>
                 </select>
               </div>
               <div>
@@ -450,19 +454,22 @@ function ClientView() {
             </label>
 
             {/* Sección de Términos y Condiciones */}
-            <div className="mt-4 rounded-xl border border-border bg-background p-4 text-xs">
+            <div className="mt-4 rounded-xl border border-border bg-background p-4 text-sm">
+              <div className="font-bold text-red-600 dark:text-red-400 text-base mb-1">
+                ¡IMPORTANTE LEER!
+              </div>
               <div className="font-medium text-foreground mb-2">Términos y condiciones de la estadía:</div>
-              <ul className="list-disc pl-4 space-y-1.5 text-muted-foreground mb-3 max-h-40 overflow-y-auto">
-                <li><strong className="text-foreground">Prohibido fumar</strong> al interior de la cabaña.</li>
-                <li><strong className="text-foreground">Prohibido traer animales.</strong></li>
-                <li><strong className="text-foreground">Prohibido música a un volumen alto</strong> después de las 22:00 hrs.</li>
-                <li><strong className="text-foreground">Prohibido ingreso de personas no alojadas</strong> a la cabaña.</li>
-                <li><strong className="text-foreground">Prohibido arrojar comida o alcohol</strong> dentro de la tinaja.</li>
-                <li><strong className="text-foreground">Prohibido llevarse algún artículo</strong> de la cabaña.</li>
-                <li><strong className="text-foreground">Prohibido orinar</strong> dentro de la tinaja.</li>
-                <li>Hacer <strong className="text-foreground">buen uso del agua</strong>.</li>
-                <li><strong className="text-foreground">No se hace devolución de dinero</strong> por cancelación de estadía; no obstante, se puede reagendar sin problemas avisando con 10 días de anticipación.</li>
-                <li>Al transferir o confirmar, <strong className="text-foreground">usted está aceptando estas condiciones</strong>.</li>
+              <ul className="list-disc pl-4 space-y-2 text-foreground mb-4 max-h-48 overflow-y-auto">
+                <li><strong>Prohibido fumar</strong> al interior de la cabaña.</li>
+                <li><strong>Prohibido traer animales.</strong></li>
+                <li><strong>Prohibido música a un volumen alto</strong> después de las 22:00 hrs.</li>
+                <li><strong>Prohibido ingreso de personas no alojadas</strong> a la cabaña.</li>
+                <li><strong>Prohibido arrojar comida o alcohol</strong> dentro de la tinaja.</li>
+                <li><strong>Prohibido llevarse algún artículo</strong> de la cabaña.</li>
+                <li><strong>Prohibido orinar</strong> dentro de la tinaja.</li>
+                <li>Hacer <strong>buen uso del agua</strong>.</li>
+                <li><strong>No se hace devolución de dinero</strong> por cancelación de estadía; no obstante, se puede reagendar sin problemas avisando con 10 días de anticipación.</li>
+                <li>Al transferir o confirmar, <strong>usted está aceptando estas condiciones</strong>.</li>
               </ul>
 
               <label className="flex items-center gap-2 cursor-pointer pt-2 border-t border-border font-medium text-foreground">
@@ -505,6 +512,12 @@ function ClientView() {
                     );
                   })}
                 </ul>
+              )}
+              {adults === 3 && (
+                <div className="flex justify-between text-xs text-primary mt-2">
+                  <span>Adicional 3° adulto</span>
+                  <span>{formatCLP(10000)}</span>
+                </div>
               )}
               <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
                 <li className="flex justify-between gap-2">
@@ -549,6 +562,9 @@ function ClientView() {
                 >
                   <MessageCircle className="h-4 w-4" /> Avisar al dueño por WhatsApp (Opcional)
                 </a>
+                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                  Nota: Mientras no realices la transferencia, el día seguirá disponible para otros usuarios.
+                </p>
               </div>
             )}
           </form>
