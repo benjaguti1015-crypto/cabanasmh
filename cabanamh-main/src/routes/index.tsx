@@ -13,6 +13,7 @@ import {
   Mail,
   MessageCircle,
   Phone,
+  ShieldCheck,
   ShowerHead,
   Sparkles,
   Tv,
@@ -91,8 +92,9 @@ function ClientView() {
   const [adults, setAdults] = useState(1);
   const [childrenCount, setChildrenCount] = useState(0);
 
-  // Estado para términos y condiciones
+  // Estados para términos y condiciones / política de privacidad
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
 
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -161,6 +163,11 @@ function ClientView() {
 
     if (!acceptTerms) {
       toast.error("Debes aceptar los términos y condiciones para continuar.");
+      return;
+    }
+
+    if (!acceptPrivacy) {
+      toast.error("Debes aceptar la política de privacidad para continuar.");
       return;
     }
 
@@ -240,12 +247,13 @@ function ClientView() {
     setAdults(1);
     setChildrenCount(0);
     setAcceptTerms(false);
+    setAcceptPrivacy(false);
     setDone(true);
     toast.success("¡Reserva solicitada con éxito! Revisa tu correo.");
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col justify-between">
       <header className="border-b border-border bg-card/70 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
@@ -264,7 +272,7 @@ function ClientView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-5 sm:py-10">
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-5 sm:py-10 w-full">
         <section className="mb-8 sm:mb-10">
           <h1 className="text-hero text-3xl sm:text-5xl">Reserva tu estadía</h1>
           <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
@@ -472,15 +480,27 @@ function ClientView() {
                 <li>Al transferir o confirmar, <strong>usted está aceptando estas condiciones</strong>.</li>
               </ul>
 
-              <label className="flex items-center gap-2 cursor-pointer pt-2 border-t border-border font-medium text-foreground">
-                <input
-                  type="checkbox"
-                  checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="h-4 w-4 rounded border-input accent-primary"
-                />
-                <span>Acepto los términos y condiciones</span>
-              </label>
+              <div className="space-y-2 pt-2 border-t border-border">
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="h-4 w-4 rounded border-input accent-primary"
+                  />
+                  <span>Acepto los términos y condiciones</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={acceptPrivacy}
+                    onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                    className="h-4 w-4 rounded border-input accent-primary"
+                  />
+                  <span>He leído y acepto la <a href="#politica-privacidad" className="text-primary underline">Política de Privacidad</a></span>
+                </label>
+              </div>
             </div>
 
             <div className="mt-6 rounded-xl bg-secondary p-4 text-sm">
@@ -569,10 +589,83 @@ function ClientView() {
             )}
           </form>
         </div>
+
+        {/* --- SECCIÓN DE POLÍTICA DE PRIVACIDAD AL FINAL --- */}
+        <section id="politica-privacidad" className="mt-16 rounded-2xl border border-border bg-card p-6 shadow-soft sm:p-8 scroll-mt-6">
+          <h2 className="flex items-center gap-2 text-hero text-2xl mb-2">
+            <ShieldCheck className="h-6 w-6 text-primary" /> Política de Privacidad
+          </h2>
+          <p className="text-xs text-muted-foreground mb-6">
+            <strong>Última actualización:</strong> 19 de septiembre de 2026
+          </p>
+
+          <div className="space-y-4 text-sm text-muted-foreground">
+            <p>
+              Nos tomamos muy en serio la protección de tus datos personales. Esta Política de Privacidad explica qué información recopilamos a través de nuestra plataforma web en el agendamiento de cabañas y cómo la utilizamos.
+            </p>
+
+            <div>
+              <h3 className="font-medium text-foreground text-base mb-1">1. ¿Qué datos recopilamos?</h3>
+              <p>Recopilamos únicamente los datos estrictamente necesarios según el servicio que estés utilizando:</p>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li><strong>Para el Agendamiento de Cabañas:</strong> Nombre, Apellido, Número de Teléfono y Correo Electrónico.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-medium text-foreground text-base mb-1">2. ¿Para qué usamos tus datos?</h3>
+              <p>La información recopilada se utiliza de manera exclusiva para los fines operativos de nuestros servicios:</p>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li><strong>Cabañas:</strong> Gestionar, coordinar y confirmar las reservas de alojamiento, así como contactarte en caso de modificaciones o dudas sobre tu estadía.</li>
+              </ul>
+              <p className="mt-2">
+                Tus datos <strong>nunca</strong> serán vendidos, arrendados ni compartidos con terceros con fines comerciales o publicitarios ajenos a nosotros.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium text-foreground text-base mb-1">3. Almacenamiento y Seguridad</h3>
+              <p>
+                Tus datos son almacenados de forma segura en bases de datos protegidas y cifradas (utilizando la infraestructura de Supabase). Aplicamos medidas técnicas para resguardar la información frente a accesos no autorizados o filtraciones.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium text-foreground text-base mb-1">4. Tus Derechos</h3>
+              <p>Como usuario y dueño de tus datos, puedes en cualquier momento:</p>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Solicitar saber qué información tenemos registrada sobre ti.</li>
+                <li>Pedir la modificación de tus datos si hay un error.</li>
+                <li>Solicitar la eliminación total de tus registros de nuestra base de datos una vez que ya no utilices el servicio.</li>
+              </ul>
+              <p className="mt-2">
+                Para ejercer cualquiera de estos derechos, solo debes escribirnos a nuestro correo de contacto: <strong className="text-foreground">contacto@cabanytinajamh.cl</strong>.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium text-foreground text-base mb-1">5. Consentimiento</h3>
+              <p>
+                Al completar y enviar los formularios de reserva en nuestra web, declaras que has leído y aceptas los términos de esta Política de Privacidad.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t border-border px-4 py-8 text-center text-xs text-muted-foreground">
-        {BUSINESS_NAME} · Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs
+      {/* --- FOOTER INSTITUCIONAL --- */}
+      <footer className="mt-16 border-t border-border bg-card/50 py-8 px-4 text-center text-xs text-muted-foreground">
+        <div className="mx-auto max-w-5xl space-y-3">
+          <p className="font-medium text-foreground">
+            {BUSINESS_NAME} · Todos los derechos reservados © 2026
+          </p>
+          <p>
+            Check-in: <strong className="text-foreground">{CHECK_IN} hrs</strong> · Check-out: <strong className="text-foreground">{CHECK_OUT} hrs</strong>
+          </p>
+          <p className="text-[11px] opacity-80 max-w-xl mx-auto">
+            Plataforma oficial de reservas. Cabaña privada con tinaja de hidromasajes, rodeada de naturaleza.
+          </p>
+        </div>
       </footer>
     </div>
   );
