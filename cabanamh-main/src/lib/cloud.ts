@@ -36,6 +36,8 @@ type ReservationRow = {
   nights: number;
   total: number;
   firewood: boolean | null;
+  adults?: number | null;
+  children?: number | null;
   created_at: string;
   status?: "pendiente" | "pagado" | null;
 };
@@ -59,6 +61,8 @@ export async function fetchCabinData(): Promise<CabinData> {
     nights: r.nights,
     total: r.total,
     firewood: r.firewood ?? false,
+    adults: r.adults ?? 1,
+    children: r.children ?? 0,
     createdAt: r.created_at,
     status: r.status ?? "pendiente",
   }));
@@ -146,6 +150,8 @@ export async function createReservation(input: {
   dates: string[];
   total: number;
   firewood: boolean;
+  adults: number;
+  children: number;
 }) {
   const { data, error } = await (supabase.from("reservations") as any)
     .insert({
@@ -156,7 +162,9 @@ export async function createReservation(input: {
       nights: input.dates.length,
       total: input.total,
       firewood: input.firewood,
-      status: "pendiente", // Asigna el estado inicial por defecto
+      adults: input.adults,
+      children: input.children,
+      status: "pendiente",
     })
     .select("id")
     .single();
