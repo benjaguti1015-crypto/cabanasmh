@@ -193,6 +193,8 @@ function ClientView() {
       dates,
       total,
       firewood,
+      adults,
+      children: childrenCount,
     });
     setSending(false);
 
@@ -468,16 +470,16 @@ function ClientView() {
               </div>
               <div className="font-medium text-foreground mb-2">Términos y condiciones de la estadía:</div>
               <ul className="list-disc pl-4 space-y-2 text-foreground mb-4 max-h-48 overflow-y-auto">
-                <li><strong>Prohibido fumar</strong> al interior de la cabaña.</li>
+                <li><strong>No se hace devolución de dinero</strong> por cancelación de estadía; no obstante, se puede reagendar sin problemas avisando con 10 días de anticipación.</li>
+                <li>Al transferir o confirmar, <strong>usted está aceptando estas condiciones</strong>.</li>
                 <li><strong>Prohibido traer animales.</strong></li>
                 <li><strong>Prohibido música a un volumen alto</strong> después de las 22:00 hrs.</li>
                 <li><strong>Prohibido ingreso de personas no alojadas</strong> a la cabaña.</li>
                 <li><strong>Prohibido arrojar comida o alcohol</strong> dentro de la tinaja.</li>
                 <li><strong>Prohibido llevarse algún artículo</strong> de la cabaña.</li>
                 <li><strong>Prohibido orinar</strong> dentro de la tinaja.</li>
+                <li><strong>Prohibido fumar</strong> al interior de la cabaña.</li>
                 <li>Hacer <strong>buen uso del agua</strong>.</li>
-                <li><strong>No se hace devolución de dinero</strong> por cancelación de estadía; no obstante, se puede reagendar sin problemas avisando con 10 días de anticipación.</li>
-                <li>Al transferir o confirmar, <strong>usted está aceptando estas condiciones</strong>.</li>
               </ul>
 
               <div className="space-y-2 pt-2 border-t border-border">
