@@ -179,6 +179,11 @@ function ClientView() {
       toast.error("Completa todos los campos.");
       return;
     }
+
+    // Validación simple para el número (asegurar que empiece con 9 o tenga formato correcto)
+    const rawPhone = form.phone.trim().replace(/[^0-9]/g, "");
+    const formattedPhone = `+56${rawPhone}`;
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       toast.error("Correo no válido.");
       return;
@@ -188,7 +193,7 @@ function ClientView() {
     const dates = [...selected].sort();
     const result = await createReservation({
       name: form.name.trim(),
-      phone: form.phone.trim(),
+      phone: formattedPhone, // Guarda con el +56 incluido
       email: form.email.trim(),
       dates,
       total,
@@ -233,7 +238,7 @@ function ClientView() {
         'template_syzww2u',
         {
           client_name: form.name.trim(),
-          client_phone: form.phone.trim(),
+          client_phone: formattedPhone,
           passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
           dates: dates.map(formatDay).join(", "),
           total: formatCLP(total),
@@ -427,13 +432,27 @@ function ClientView() {
                 value={form.name}
                 onChange={(v) => setForm({ ...form, name: v })}
               />
-              <Field
-                icon={<Phone className="h-4 w-4" />}
-                placeholder="Número de teléfono"
-                type="tel"
-                value={form.phone}
-                onChange={(v) => setForm({ ...form, phone: v })}
-              />
+
+              {/* Campo de teléfono adaptado con +56 fijo */}
+              <div>
+                <label className="flex items-center gap-3 rounded-xl border border-input bg-background px-4 py-3 focus-within:ring-2 focus-within:ring-ring">
+                  <span className="shrink-0 text-muted-foreground"><Phone className="h-4 w-4" /></span>
+                  <span className="text-sm font-medium text-muted-foreground select-none">+56</span>
+                  <input
+                    required
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="912345678"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/[^0-9]/g, "") })}
+                    className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground sm:text-sm text-foreground"
+                  />
+                </label>
+                <p className="mt-1 text-[11px] text-muted-foreground pl-1">
+                  Ingresa tu número sin el +56 (pon solo desde el 9, ej: 912345678)
+                </p>
+              </div>
+
               <Field
                 icon={<Mail className="h-4 w-4" />}
                 placeholder="Correo electrónico"

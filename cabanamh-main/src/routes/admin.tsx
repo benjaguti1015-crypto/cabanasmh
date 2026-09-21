@@ -281,12 +281,6 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     toast.success(willBlock ? "Día marcado como ocupado." : "Día habilitado.");
   };
 
-  const del = async (id: string) => {
-    await deleteReservation(id);
-    await reload();
-    toast.success("Reserva eliminada.");
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/70 backdrop-blur">
@@ -577,25 +571,33 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                   <li key={r.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="font-medium">{r.name}</p>
-                        <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                          <Phone className="h-3 w-3" /> {r.phone}
+                        {/* Nombre más grande y en negrita */}
+                        <p className="text-base font-bold text-foreground">{r.name}</p>
+                        
+                        {/* Teléfono más grande y en negrita */}
+                        <p className="mt-1.5 flex items-center gap-2 text-sm font-bold text-foreground">
+                          <Phone className="h-4 w-4 text-muted-foreground shrink-0" /> {r.phone}
                         </p>
-                        <p className="mt-1 flex items-center gap-2 break-all text-xs text-muted-foreground">
-                          <Mail className="h-3 w-3 shrink-0" /> {r.email}
+                        
+                        {/* Correo más grande y en negrita */}
+                        <p className="mt-1 flex items-center gap-2 break-all text-sm font-bold text-foreground">
+                          <Mail className="h-4 w-4 shrink-0 text-muted-foreground" /> {r.email}
                         </p>
-                        <p className="mt-1 text-xs font-medium text-primary">
-                          👥 Pasajeros: {(r as any).adults ?? 1} adulto{((r as any).adults ?? 1) > 1 ? "s" : ""} {(r as any).children !== undefined ? `· ${(r as any).children} niño${(r as any).children > 1 ? "s" : ""}` : ""}
+                        
+                        {/* Pasajeros más grande y en negrita */}
+                        <p className="mt-1.5 text-sm font-bold text-primary">
+                          👥 Pasajeros: {(r as any).adults ?? 1} adulto{((r as any).adults ?? 1) > 1 ? "s" : ""} · {(r as any).children ?? 0} niño{((r as any).children ?? 0) > 1 ? "s" : ""}
                         </p>
+                        
                         <p
                           className={[
-                            "mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium",
+                            "mt-2.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
                             r.firewood
                               ? "bg-orange-100 text-orange-900 ring-1 ring-orange-300/80 dark:bg-orange-950/50 dark:text-orange-100 dark:ring-orange-700"
                               : "bg-muted text-muted-foreground",
                           ].join(" ")}
                         >
-                          <Flame className="h-3 w-3 shrink-0" />
+                          <Flame className="h-3.5 w-3.5 shrink-0" />
                           {r.firewood
                             ? `Saco de leña · ${formatCLP(FIREWOOD_PRICE)} en efectivo al llegar`
                             : "Sin leña adicional"}
@@ -606,24 +608,23 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                         <p className="text-xs text-muted-foreground">{r.nights} noche(s)</p>
                       </div>
                     </div>
-                    <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
-                      {r.dates.map(formatDay).join(" · ")}
+                    {/* Fechas de reserva más grandes y en negrita */}
+                    <p className="mt-3 border-t border-border pt-3 text-sm font-bold text-foreground">
+                      📅 {r.dates.map(formatDay).join(" · ")}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-medium text-muted-foreground">Pago:</span>
                         <select
-                          className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring font-semibold"
                           value={(r as any).status || "pendiente"}
                           onChange={async (e) => {
                             const newStatus = e.target.value as "pendiente" | "pagado";
-                            console.log("Intentando actualizar reserva ID:", r.id, "a estado:", newStatus);
                             const ok = await updateReservationStatus(r.id, newStatus);
                             if (ok) {
                               toast.success(`Estado actualizado a: ${newStatus}`);
                               await reload();
                             } else {
-                              console.error("Fallo al actualizar en cloud. Revisa Supabase.");
                               toast.error("No se pudo actualizar el estado de pago.");
                             }
                           }}
@@ -646,13 +647,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                     <div className="mt-3 flex flex-wrap items-center gap-4">
                       <button
                         onClick={() => startEdit(r)}
-                        className="flex items-center gap-2 text-xs text-primary hover:underline"
+                        className="flex items-center gap-2 text-xs text-primary hover:underline font-medium"
                       >
                         <Pencil className="h-3 w-3" /> Editar fechas
                       </button>
                       <button
                         onClick={() => del(r.id)}
-                        className="flex items-center gap-2 text-xs text-destructive hover:underline"
+                        className="flex items-center gap-2 text-xs text-destructive hover:underline font-medium"
                       >
                         <Trash2 className="h-3 w-3" /> Eliminar reserva
                       </button>
