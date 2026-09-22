@@ -196,6 +196,9 @@ export async function updateReservationStatus(id: string, status: "pendiente" | 
 
 export async function deleteReservation(id: string) {
   const { error } = await supabase.from("reservations").delete().eq("id", id);
+  if (error) {
+    console.error("Error al eliminar reserva en Supabase:", error);
+  }
   return !error;
 }
 
