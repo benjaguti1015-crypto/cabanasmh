@@ -202,6 +202,16 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     setEditDates([]);
   };
 
+  const del = async (id: string) => {
+    const success = await deleteReservation(id);
+    if (success) {
+      toast.success("Reserva eliminada con éxito.");
+      await reload();
+    } else {
+      toast.error("No se pudo eliminar la reserva.");
+    }
+  };
+
   /** Toca días para mover la reserva; viernes y sábado se mueven juntos. */
   const toggleEditDay = (day: string) => {
     const group = weekendPackage(day);
