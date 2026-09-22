@@ -660,7 +660,7 @@ function ClientView() {
                 <li>Solicitar la eliminación total de tus registros de nuestra base de datos una vez que ya no utilices el servicio.</li>
               </ul>
               <p className="mt-2">
-                Para ejercer cualquiera de estos derechos, solo debes escribirnos a nuestro correo de contacto: <strong className="text-foreground">contacto@cabanytinajamh.cl</strong>.
+                Para ejercer cualquiera de estos derechos, solo debes escribirnos a nuestro correo de contacto: <strong className="text-foreground">cabanamh27@gmail.com</strong>.
               </p>
             </div>
 
