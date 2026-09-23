@@ -13,6 +13,7 @@ import {
   Mail,
   MessageCircle,
   Phone,
+  Search,
   ShieldCheck,
   ShowerHead,
   Sparkles,
@@ -41,6 +42,7 @@ import {
   rateForDay,
   totalForDays,
   weekendPackage,
+  type Reservation,
 } from "@/lib/booking";
 
 export const Route = createFileRoute("/")({
@@ -98,6 +100,17 @@ function ClientView() {
 
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
+  const [lastBookingId, setLastBookingId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("mh_last_booking_id");
+    }
+    return null;
+  });
+
+  // Estado para el modal de consulta de reserva
+  const [showLookupModal, setShowLookupModal] = useState(false);
+  const [lookupIdInput, setLookupIdInput] = useState("");
+  const [searchedReservation, setSearchedReservation] = useState<Reservation | null>(null);
 
   const { rates, offers, holidays } = data;
   const occupied = useMemo(
@@ -208,10 +221,14 @@ function ClientView() {
       toast.error("Alguien acaba de tomar esas noches. El calendario ya se actualizó.");
       return;
     }
-    if (result.error) {
+    if (result.error || !result.id) {
       toast.error("No pudimos guardar la reserva. Intenta de nuevo.");
       return;
     }
+
+    const newBookingId = result.id;
+    setLastBookingId(newBookingId);
+    localStorage.setItem("mh_last_booking_id", newBookingId);
 
     // --- 1. ENVÍO DE CORREO AUTOMÁTICO AL CLIENTE (EmailJS) ---
     try {
@@ -221,6 +238,7 @@ function ClientView() {
         {
           client_name: form.name.trim(),
           client_email: form.email.trim(),
+          booking_id: newBookingId,
           dates: dates.map(formatDay).join(", "),
           passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
           total: formatCLP(total),
@@ -239,6 +257,7 @@ function ClientView() {
         {
           client_name: form.name.trim(),
           client_phone: formattedPhone,
+          booking_id: newBookingId,
           passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
           dates: dates.map(formatDay).join(", "),
           total: formatCLP(total),
@@ -259,6 +278,23 @@ function ClientView() {
     toast.success("¡Reserva solicitada con éxito! Revisa tu correo.");
   };
 
+  const handleLookup = (e: React.FormEvent) => {
+    e.preventDefault();
+    const queryId = lookupIdInput.trim();
+    if (!queryId) {
+      toast.error("Ingresa un ID de reserva válido.");
+      return;
+    }
+    const found = data.reservations.find((r) => r.id.toLowerCase() === queryId.toLowerCase());
+    if (found) {
+      setSearchedReservation(found);
+      toast.success("¡Reserva encontrada!");
+    } else {
+      setSearchedReservation(null);
+      toast.error("No se encontró ninguna reserva con ese ID.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col justify-between">
       <header className="border-b border-border bg-card/70 backdrop-blur">
@@ -276,6 +312,13 @@ function ClientView() {
               </p>
             </div>
           </div>
+
+          <button
+            onClick={() => setShowLookupModal(true)}
+            className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground shadow-sm"
+          >
+            <Search className="h-3.5 w-3.5 text-primary" /> Consultar mi reserva
+          </button>
         </div>
       </header>
 
@@ -595,8 +638,14 @@ function ClientView() {
                 <p className="text-sm font-medium text-foreground">
                   ¡Reserva solicitada con éxito! Te hemos enviado un correo con las instrucciones de transferencia.
                 </p>
+                {lastBookingId && (
+                  <div className="rounded-lg bg-background p-2.5 border border-border text-xs">
+                    <span className="text-muted-foreground">Tu ID de reserva es:</span>
+                    <p className="font-mono font-bold text-primary text-sm mt-0.5">{lastBookingId}</p>
+                  </div>
+                )}
                 <a
-                  href={`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(`Hola, acabo de solicitar una reserva en Cabaña y tinaja MH. ¡Quedo atento!`)}`}
+                  href={`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(`Hola, acabo de solicitar una reserva en Cabaña y tinaja MH (ID: ${lastBookingId ?? "N/A"}). ¡Quedo atento!`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-green-600 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
@@ -610,6 +659,71 @@ function ClientView() {
             )}
           </form>
         </div>
+
+        {/* --- MODAL / SECCIÓN DE CONSULTA DE RESERVA --- */}
+        {showLookupModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-hero text-xl flex items-center gap-2">
+                  <Search className="h-5 w-5 text-primary" /> Consultar reserva
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowLookupModal(false);
+                    setSearchedReservation(null);
+                    setLookupIdInput("");
+                  }}
+                  className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Ingresa el ID único de tu reserva para ver su estado, fechas y detalles.
+              </p>
+
+              <form onSubmit={handleLookup} className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ej: f47ac10b-58cc..."
+                    value={lookupIdInput || (lastBookingId ?? "")}
+                    onChange={(e) => setLookupIdInput(e.target.value)}
+                    className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-xs font-mono outline-none focus:ring-2 focus:ring-ring text-foreground"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-primary px-4 py-2.5 text-xs font-medium text-primary-foreground transition-all hover:shadow-lift shrink-0"
+                  >
+                    Buscar
+                  </button>
+                </div>
+              </form>
+
+              {searchedReservation && (
+                <div className="mt-4 rounded-xl border border-border bg-secondary p-4 space-y-3 text-xs">
+                  <div className="flex justify-between items-center border-b border-border pb-2">
+                    <span className="font-semibold text-foreground text-sm">{searchedReservation.name}</span>
+                    <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${searchedReservation.status === 'pagado' ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200'}`}>
+                      {searchedReservation.status ?? "pendiente"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 text-muted-foreground">
+                    <p><strong>Teléfono:</strong> {searchedReservation.phone}</p>
+                    <p><strong>Correo:</strong> {searchedReservation.email}</p>
+                    <p><strong>Pasajeros:</strong> {searchedReservation.adults ?? 1} adulto(s) · {searchedReservation.children ?? 0} niño(s)</p>
+                    <p><strong>Noches agendadas:</strong> {searchedReservation.nights}</p>
+                    <p><strong>Fechas:</strong> <span className="font-bold text-foreground">{searchedReservation.dates.map(formatDay).join(" · ")}</span></p>
+                    <p><strong>Total online:</strong> <span className="text-hero text-sm font-bold text-foreground">{formatCLP(searchedReservation.total)}</span></p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* --- SECCIÓN DE POLÍTICA DE PRIVACIDAD AL FINAL --- */}
         <section id="politica-privacidad" className="mt-16 rounded-2xl border border-border bg-card p-6 shadow-soft sm:p-8 scroll-mt-6">
