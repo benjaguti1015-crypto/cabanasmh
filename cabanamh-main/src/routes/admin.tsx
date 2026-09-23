@@ -393,6 +393,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           </form>
         </section>
 
+        {/* --- PANEL DE EDICIÓN DE FECHAS (VISIBLE CUANDO SE SELECCIONA UNA RESERVA) --- */}
         {editing && (
           <section className="rounded-2xl border border-primary/40 bg-card p-4 shadow-soft sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
