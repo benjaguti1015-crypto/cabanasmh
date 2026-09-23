@@ -647,7 +647,7 @@ function ClientView() {
             <div>
               <h3 className="font-medium text-foreground text-base mb-1">3. Almacenamiento y Seguridad</h3>
               <p>
-                Tus datos son almacenados de forma segura en bases de datos protegidas y cifradas (utilizando la infraestructura de Supabase). Aplicamos medidas técnicas para resguardar la información frente a accesos no autorizados o filtraciones.
+                Tus datos son almacenados de forma segura en bases de datos protegidas y cifradas . Aplicamos medidas técnicas para resguardar la información frente a accesos no autorizados o filtraciones.
               </p>
             </div>
 

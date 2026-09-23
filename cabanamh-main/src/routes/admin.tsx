@@ -149,6 +149,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [offerInput, setOfferInput] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDates, setEditDates] = useState<string[]>([]);
+  
+  // Estado para controlar cuál reserva está pidiendo confirmación de borrado
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     if (ratesTouched) return;
@@ -206,6 +209,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     const success = await deleteReservation(id);
     if (success) {
       toast.success("Reserva eliminada con éxito.");
+      setDeleteConfirmId(null);
       await reload();
     } else {
       toast.error("No se pudo eliminar la reserva.");
@@ -654,19 +658,39 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                       </a>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-4">
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
                       <button
                         onClick={() => startEdit(r)}
                         className="flex items-center gap-2 text-xs text-primary hover:underline font-medium"
                       >
                         <Pencil className="h-3 w-3" /> Editar fechas
                       </button>
-                      <button
-                        onClick={() => del(r.id)}
-                        className="flex items-center gap-2 text-xs text-destructive hover:underline font-medium"
-                      >
-                        <Trash2 className="h-3 w-3" /> Eliminar reserva
-                      </button>
+
+                      {/* --- SECCIÓN DE CONFIRMACIÓN DE ELIMINACIÓN --- */}
+                      {deleteConfirmId === r.id ? (
+                        <div className="flex items-center gap-2 bg-destructive/10 px-3 py-1 rounded-lg border border-destructive/30">
+                          <span className="text-xs font-bold text-destructive">¿Estás seguro?</span>
+                          <button
+                            onClick={() => del(r.id)}
+                            className="rounded bg-destructive px-2.5 py-1 text-xs font-bold text-destructive-foreground transition-all hover:opacity-90"
+                          >
+                            Sí, eliminar
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirmId(null)}
+                            className="rounded border border-border bg-background px-2 py-1 text-xs font-medium text-foreground transition-all hover:bg-accent"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setDeleteConfirmId(r.id)}
+                          className="flex items-center gap-2 text-xs text-destructive hover:underline font-medium"
+                        >
+                          <Trash2 className="h-3 w-3" /> Eliminar reserva
+                        </button>
+                      )}
                     </div>
                   </li>
                 ))}
