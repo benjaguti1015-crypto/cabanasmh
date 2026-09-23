@@ -198,6 +198,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const startEdit = (r: Reservation) => {
     setEditingId(r.id);
     setEditDates([...r.dates].sort());
+    // Hace scroll suave hacia arriba para que el panel de edición sea visible de inmediato
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const cancelEdit = () => {
