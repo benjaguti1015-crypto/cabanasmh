@@ -351,11 +351,7 @@ function ClientView() {
             <Info className="h-5 w-5 shrink-0 text-primary" /> Información y tarifas
           </h2>
           <p className="mt-1 text-sm font-medium text-muted-foreground">
-          Información y tarifas
-          Valores por noche.
-          Capacidad máxima: 3 adultos o 2 adultos y 2 niños.
-          Nota importante: Para 3 adultos se aplica un cargo adicional de $10.000.
-          Check-in: 16:00 hrs.   Check-out: 14:00 hrs. 
+            Valores por noche. Capacidad máxima: 3 adultos o 2 adultos y 2 niños (en caso contrario, no se podrá arrendar la cabaña). Para 3 adultos se aplica un cargo adicional de $10.000. Check-in {CHECK_IN} hrs · Check-out {CHECK_OUT} hrs.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
