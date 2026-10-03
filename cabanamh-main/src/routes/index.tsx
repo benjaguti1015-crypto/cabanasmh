@@ -233,8 +233,8 @@ function ClientView() {
     // --- 1. ENVÍO DE CORREO AUTOMÁTICO AL CLIENTE (EmailJS) ---
     try {
       await emailjs.send(
-        'service_9gb8cmf',
-        'template_m4c2g45',
+        'service_80ih4mw',
+        'template_5642rgn',
         {
           client_name: form.name.trim(),
           client_email: form.email.trim(),
@@ -243,7 +243,7 @@ function ClientView() {
           passengers: `${adults} adulto(s), ${childrenCount} niño(s)`,
           total: formatCLP(total),
         },
-        'ePdaz67F06AKh8qyp'
+        'QUI7ycnykqaO2txZe'
       );
     } catch (err) {
       console.error("Error al enviar correo automático al cliente:", err);
@@ -252,8 +252,8 @@ function ClientView() {
     // --- 2. ENVÍO DE NOTIFICACIÓN AUTOMÁTICA AL DUEÑO (EmailJS) ---
     try {
       await emailjs.send(
-        'service_9gb8cmf',
-        'template_syzww2u',
+        'service_80ih4mw',
+        'template_1pl1p47',
         {
           client_name: form.name.trim(),
           client_phone: formattedPhone,
@@ -262,7 +262,7 @@ function ClientView() {
           dates: dates.map(formatDay).join(", "),
           total: formatCLP(total),
         },
-        'ePdaz67F06AKh8qyp'
+        'QUI7ycnykqaO2txZe'
       );
     } catch (err) {
       console.error("Error al enviar notificación al dueño:", err);
