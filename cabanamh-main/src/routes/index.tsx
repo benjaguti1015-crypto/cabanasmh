@@ -27,14 +27,13 @@ import { toast } from "sonner";
 import emailjs from "@emailjs/browser";
 
 import { BookingCalendar } from "@/components/BookingCalendar";
-import { createReservation, useCabinData } from "@/lib/cloud";
+import { createReservation, lookupReservation, useCabinData } from "@/lib/cloud";
 import {
   BUSINESS_NAME,
   CHECK_IN,
   CHECK_OUT,
   FIREWOOD_PRICE,
   OWNER_WHATSAPP,
-  bookedDays,
   formatCLP,
   formatDay,
   isWeekend,
@@ -114,8 +113,8 @@ function ClientView() {
 
   const { rates, offers, holidays } = data;
   const occupied = useMemo(
-    () => [...bookedDays(data.reservations), ...data.blocked],
-    [data.reservations, data.blocked],
+    () => [...data.booked, ...data.blocked],
+    [data.booked, data.blocked],
   );
 
   const nights = selected.length;
@@ -278,14 +277,14 @@ function ClientView() {
     toast.success("¡Reserva solicitada con éxito! Revisa tu correo.");
   };
 
-  const handleLookup = (e: React.FormEvent) => {
+  const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
     const queryId = lookupIdInput.trim();
     if (!queryId) {
       toast.error("Ingresa un ID de reserva válido.");
       return;
     }
-    const found = data.reservations.find((r) => r.id.toLowerCase() === queryId.toLowerCase());
+    const found = /^[0-9a-f-]{36}$/i.test(queryId) ? await lookupReservation(queryId) : null;
     if (found) {
       setSearchedReservation(found);
       toast.success("¡Reserva encontrada!");

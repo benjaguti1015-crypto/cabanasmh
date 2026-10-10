@@ -10,7 +10,8 @@ import {
 } from "@/lib/booking";
 
 export type CabinData = {
-  reservations: Reservation[];
+  reservations: Reservation[]; // solo el admin las recibe (RLS)
+  booked: string[]; // noches pagadas, visibles para todos
   blocked: string[];
   offers: Record<string, number>;
   holidays: string[];
@@ -20,6 +21,7 @@ export type CabinData = {
 
 const EMPTY: CabinData = {
   reservations: [],
+  booked: [],
   blocked: [],
   offers: {},
   holidays: [],
@@ -43,8 +45,9 @@ type ReservationRow = {
 };
 
 export async function fetchCabinData(): Promise<CabinData> {
-  const [res, blk, off, hol, exp, set] = await Promise.all([
+  const [res, bkd, blk, off, hol, exp, set] = await Promise.all([
     supabase.from("reservations").select("*").order("created_at", { ascending: true }),
+    (supabase as any).rpc("public_booked_days"),
     supabase.from("blocked_days").select("day"),
     supabase.from("offer_days").select("day, price"),
     supabase.from("holiday_days").select("day"),
@@ -74,6 +77,7 @@ export async function fetchCabinData(): Promise<CabinData> {
 
   return {
     reservations,
+    booked: ((bkd.data ?? []) as string[]).slice().sort(),
     blocked: ((blk.data ?? []) as { day: string }[]).map((b) => b.day).sort(),
     offers,
     holidays: ((hol.data ?? []) as { day: string }[]).map((h) => h.day).sort(),
@@ -153,27 +157,48 @@ export async function createReservation(input: {
   adults: number;
   children: number;
 }) {
-  const { data, error } = await (supabase.from("reservations") as any)
-    .insert({
-      name: input.name,
-      phone: input.phone,
-      email: input.email,
-      dates: input.dates,
-      nights: input.dates.length,
-      total: input.total,
-      firewood: input.firewood,
-      adults: input.adults,
-      children: input.children,
-      status: "pendiente",
-    })
-    .select("id")
-    .single();
+  // El visitante no puede leer la tabla, así que el ID se genera aquí.
+  const id = crypto.randomUUID();
+  const { error } = await (supabase.from("reservations") as any).insert({
+    id,
+    name: input.name,
+    phone: input.phone,
+    email: input.email,
+    dates: input.dates,
+    nights: input.dates.length,
+    total: input.total, // el servidor lo recalcula
+    firewood: input.firewood,
+    adults: input.adults,
+    children: input.children,
+    status: "pendiente",
+  });
 
   if (error) {
     console.error("Error al crear reserva:", error);
-    return { error: "failed" as const };
+    return { error: String(error.message).includes("DATES_TAKEN") ? ("conflict" as const) : ("failed" as const) };
   }
-  return { id: data.id };
+  return { id };
+}
+
+/** Busca una reserva por su ID (función pública que solo devuelve esa fila). */
+export async function lookupReservation(id: string): Promise<Reservation | null> {
+  const { data, error } = await (supabase as any).rpc("lookup_reservation", { p_id: id });
+  const r = (data as ReservationRow[] | null)?.[0];
+  if (error || !r) return null;
+  return {
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    email: r.email,
+    dates: [...(r.dates ?? [])].sort(),
+    nights: r.nights,
+    total: r.total,
+    firewood: r.firewood ?? false,
+    adults: r.adults ?? 1,
+    children: r.children ?? 0,
+    createdAt: r.created_at,
+    status: r.status ?? "pendiente",
+  };
 }
 
 export async function updateReservationDates(id: string, dates: string[], total: number) {

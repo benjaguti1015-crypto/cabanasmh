@@ -4,7 +4,6 @@ export const CHECK_OUT = "14:00";
 /** Datos del negocio. Teléfono del dueño en formato internacional, sin +. */
 export const OWNER_WHATSAPP = "56981443440";
 export const ADMIN_EMAIL = "cabanamh27@gmail.com";
-export const ADMIN_PASSWORD = "nacho1234";
 export const BUSINESS_NAME = "Cabaña y tinaja MH";
 
 /** Tarifas por defecto: domingo a jueves, fin de semana (viernes y sábado) y feriados. */
@@ -35,8 +34,6 @@ export type Expense = {
   amount: number;
   date: string; // yyyy-mm-dd
 };
-
-const AUTH_KEY = "mh_admin_auth";
 
 export const toKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -135,14 +132,6 @@ export const incomeInRange = (
 
 export const expensesInRange = (list: Expense[], range: { start: string; end: string }) =>
   list.filter((e) => inRange(e.date, range)).reduce((s, e) => s + e.amount, 0);
-
-export const isAdminLogged = () =>
-  typeof window !== "undefined" && window.sessionStorage.getItem(AUTH_KEY) === "1";
-export const setAdminLogged = (v: boolean) => {
-  if (typeof window === "undefined") return;
-  if (v) window.sessionStorage.setItem(AUTH_KEY, "1");
-  else window.sessionStorage.removeItem(AUTH_KEY);
-};
 
 export const formatCLP = (n: number) =>
   new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);

@@ -20,8 +20,10 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import type { Session } from "@supabase/supabase-js";
 
 import logo from "../assets/logo.jpg";
+import { supabase } from "@/integrations/supabase/client";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import {
   addExpense,
@@ -40,7 +42,6 @@ import {
 } from "@/lib/cloud";
 import {
   ADMIN_EMAIL,
-  ADMIN_PASSWORD,
   BUSINESS_NAME,
   CHECK_IN,
   CHECK_OUT,
@@ -51,9 +52,7 @@ import {
   formatDay,
   formatDayLong,
   incomeInRange,
-  isAdminLogged,
   periodRange,
-  setAdminLogged,
   toKey,
   totalForDays,
   weekendPackage,
@@ -78,20 +77,28 @@ export const Route = createFileRoute("/admin")({
 
 function AdminView() {
   const [logged, setLogged] = useState(false);
-  useEffect(() => setLogged(isAdminLogged()), []);
-  return logged ? <Dashboard onLogout={() => setLogged(false)} /> : <Login onLogin={() => setLogged(true)} />;
+  useEffect(() => {
+    const check = (session: Session | null) =>
+      setLogged(session?.user.app_metadata["role"] === "admin");
+    void supabase.auth.getSession().then(({ data }) => check(data.session));
+    const { data } = supabase.auth.onAuthStateChange((_e, session) => check(session));
+    return () => data.subscription.unsubscribe();
+  }, []);
+  return logged ? <Dashboard onLogout={() => setLogged(false)} /> : <Login />;
 }
 
-function Login({ onLogin }: { onLogin: () => void }) {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim().toLowerCase() === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      setAdminLogged(true);
-      onLogin();
-    } else {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
+    if (error || data.user?.app_metadata["role"] !== "admin") {
+      if (!error) await supabase.auth.signOut();
       toast.error("Credenciales incorrectas.");
     }
   };
@@ -309,8 +316,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             </div>
           </div>
           <button
-            onClick={() => {
-              setAdminLogged(false);
+            onClick={async () => {
+              await supabase.auth.signOut();
               onLogout();
             }}
             className="flex shrink-0 items-center gap-2 rounded-full border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-4"
