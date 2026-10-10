@@ -170,7 +170,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const booked = reservations.flatMap((r) => r.dates);
   const income = reservations.reduce((sum, r) => sum + r.total, 0);
   const editing = reservations.find((r) => r.id === editingId) ?? null;
-  const editTotal = totalForDays(editDates, rates, offers, holidays);
+  // +10.000 de recargo si la reserva es de 3 adultos (igual que al reservar)
+  const editTotal = totalForDays(editDates, rates, offers, holidays) + (editing?.adults === 3 ? 10000 : 0);
 
   const savePrice = async (e: React.FormEvent) => {
     e.preventDefault();
