@@ -12,7 +12,14 @@ import {
 import { toast } from "sonner";
 
 import { updateReservationStatus } from "@/lib/cloud";
-import { FIREWOOD_PRICE, formatCLP, formatDay, toKey, type Reservation } from "@/lib/booking";
+import {
+  FIREWOOD_PRICE,
+  formatCLP,
+  formatDay,
+  parseKey,
+  toKey,
+  type Reservation,
+} from "@/lib/booking";
 
 type Filter = "upcoming" | "pending" | "past" | "all";
 const PAGE_SIZE = 15;
@@ -46,6 +53,7 @@ export function ReservationsPanel({
 }) {
   const [filter, setFilter] = useState<Filter>("upcoming");
   const [query, setQuery] = useState("");
+  const [month, setMonth] = useState(""); // "yyyy-mm" o vacío = todos
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [openId, setOpenId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -58,8 +66,16 @@ export function ReservationsPanel({
     all: () => true,
   };
 
+  // Meses que tienen alguna noche reservada
+  const months = [
+    ...new Set(reservations.flatMap((r) => r.dates.map((d) => d.slice(0, 7)))),
+  ].sort();
+  const scoped = month
+    ? reservations.filter((r) => r.dates.some((d) => d.startsWith(month)))
+    : reservations;
+
   const q = query.trim().toLowerCase();
-  const list = reservations
+  const list = scoped
     .filter(matches[filter])
     .filter((r) => !q || `${r.name} ${r.email} ${r.phone} ${r.id}`.toLowerCase().includes(q))
     .sort((a, b) => {
@@ -71,17 +87,36 @@ export function ReservationsPanel({
     <div>
       <h2 className="mb-3 text-hero text-xl">Reservas agendadas</h2>
 
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={query}
+      <div className="flex flex-wrap gap-2">
+        <div className="relative min-w-0 flex-1 basis-56">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setLimit(PAGE_SIZE);
+            }}
+            placeholder="Buscar por nombre, correo, teléfono o ID"
+            className="w-full rounded-xl border border-input bg-background py-2.5 pl-9 pr-4 text-base text-foreground outline-none focus:ring-2 focus:ring-ring sm:text-sm"
+          />
+        </div>
+        <select
+          value={month}
           onChange={(e) => {
-            setQuery(e.target.value);
+            setMonth(e.target.value);
+            if (e.target.value) setFilter("all"); // un mes puntual puede ser pasado: no lo ocultes
             setLimit(PAGE_SIZE);
           }}
-          placeholder="Buscar por nombre, correo, teléfono o ID"
-          className="w-full rounded-xl border border-input bg-background py-2.5 pl-9 pr-4 text-base text-foreground outline-none focus:ring-2 focus:ring-ring sm:text-sm"
-        />
+          aria-label="Filtrar por mes"
+          className="rounded-xl border border-input bg-background px-3 py-2.5 text-base capitalize text-foreground outline-none focus:ring-2 focus:ring-ring sm:text-sm"
+        >
+          <option value="">Todos los meses</option>
+          {months.map((m) => (
+            <option key={m} value={m}>
+              {parseKey(`${m}-01`).toLocaleDateString("es-CL", { month: "long", year: "numeric" })}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
@@ -100,7 +135,7 @@ export function ReservationsPanel({
                 : "border-border text-muted-foreground hover:text-foreground",
             ].join(" ")}
           >
-            {label} · {reservations.filter(matches[value]).length}
+            {label} · {scoped.filter(matches[value]).length}
           </button>
         ))}
       </div>
