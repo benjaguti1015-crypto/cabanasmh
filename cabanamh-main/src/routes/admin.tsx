@@ -25,6 +25,7 @@ import type { Session } from "@supabase/supabase-js";
 import logo from "../assets/logo.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingCalendar } from "@/components/BookingCalendar";
+import { ReservationsPanel } from "@/components/ReservationsPanel";
 import {
   addExpense,
   checkCloudStatus,
@@ -157,9 +158,6 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDates, setEditDates] = useState<string[]>([]);
   
-  // Estado para controlar cuál reserva está pidiendo confirmación de borrado
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-
   useEffect(() => {
     if (ratesTouched) return;
     setWeekdayInput(String(rates.weekday));
@@ -219,7 +217,6 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     const success = await deleteReservation(id);
     if (success) {
       toast.success("Reserva eliminada con éxito.");
-      setDeleteConfirmId(null);
       await reload();
     } else {
       toast.error("No se pudo eliminar la reserva.");
@@ -584,130 +581,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             )}
           </div>
 
-          <div>
-            <h2 className="mb-3 text-hero text-xl">Reservas agendadas</h2>
-            {reservations.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                Aún no hay reservas registradas.
-              </p>
-            ) : (
-              <ul className="space-y-3">
-                {reservations.map((r) => (
-                  <li key={r.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        {/* Nombre más grande y en negrita */}
-                        <p className="text-base font-bold text-foreground">{r.name}</p>
-                        
-                        {/* Teléfono más grande y en negrita */}
-                        <p className="mt-1.5 flex items-center gap-2 text-sm font-bold text-foreground">
-                          <Phone className="h-4 w-4 text-muted-foreground shrink-0" /> {r.phone}
-                        </p>
-                        
-                        {/* Correo más grande y en negrita */}
-                        <p className="mt-1 flex items-center gap-2 break-all text-sm font-bold text-foreground">
-                          <Mail className="h-4 w-4 shrink-0 text-muted-foreground" /> {r.email}
-                        </p>
-                        
-                        {/* Pasajeros más grande y en negrita */}
-                        <p className="mt-1.5 text-sm font-bold text-primary">
-                          👥 Pasajeros: {(r as any).adults ?? 1} adulto{((r as any).adults ?? 1) > 1 ? "s" : ""} · {(r as any).children ?? 0} niño{((r as any).children ?? 0) > 1 ? "s" : ""}
-                        </p>
-                        
-                        <p
-                          className={[
-                            "mt-2.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
-                            r.firewood
-                              ? "bg-orange-100 text-orange-900 ring-1 ring-orange-300/80 dark:bg-orange-950/50 dark:text-orange-100 dark:ring-orange-700"
-                              : "bg-muted text-muted-foreground",
-                          ].join(" ")}
-                        >
-                          <Flame className="h-3.5 w-3.5 shrink-0" />
-                          {r.firewood
-                            ? `Saco de leña · ${formatCLP(FIREWOOD_PRICE)} en efectivo al llegar`
-                            : "Sin leña adicional"}
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-hero text-xl">{formatCLP(r.total)}</p>
-                        <p className="text-xs text-muted-foreground">{r.nights} noche(s)</p>
-                      </div>
-                    </div>
-                    {/* Fechas de reserva más grandes y en negrita */}
-                    <p className="mt-3 border-t border-border pt-3 text-sm font-bold text-foreground">
-                      📅 {r.dates.map(formatDay).join(" · ")}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-muted-foreground">Pago:</span>
-                        <select
-                          className="rounded-lg border border-input bg-background px-2.5 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring font-semibold"
-                          value={(r as any).status || "pendiente"}
-                          onChange={async (e) => {
-                            const newStatus = e.target.value as "pendiente" | "pagado";
-                            const ok = await updateReservationStatus(r.id, newStatus);
-                            if (ok) {
-                              toast.success(`Estado actualizado a: ${newStatus}`);
-                              await reload();
-                            } else {
-                              toast.error("No se pudo actualizar el estado de pago.");
-                            }
-                          }}
-                        >
-                          <option value="pendiente">Pendiente</option>
-                          <option value="pagado">Pagado</option>
-                        </select>
-                      </div>
-
-                      <a
-                        href={`https://api.whatsapp.com/send?phone=${r.phone.replace(/[^0-9]/g, "")}&text=${encodeURIComponent(`Hola ${r.name}, te escribimos de Cabaña y tinaja MH para confirmar los detalles de tu reserva.`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <MessageCircle className="h-3.5 w-3.5 text-green-600" /> WhatsApp
-                      </a>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-                      <button
-                        onClick={() => startEdit(r)}
-                        className="flex items-center gap-2 text-xs text-primary hover:underline font-medium"
-                      >
-                        <Pencil className="h-3 w-3" /> Editar fechas
-                      </button>
-
-                      {/* --- SECCIÓN DE CONFIRMACIÓN DE ELIMINACIÓN --- */}
-                      {deleteConfirmId === r.id ? (
-                        <div className="flex items-center gap-2 bg-destructive/10 px-3 py-1 rounded-lg border border-destructive/30">
-                          <span className="text-xs font-bold text-destructive">¿Estás seguro?</span>
-                          <button
-                            onClick={() => del(r.id)}
-                            className="rounded bg-destructive px-2.5 py-1 text-xs font-bold text-destructive-foreground transition-all hover:opacity-90"
-                          >
-                            Sí, eliminar
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirmId(null)}
-                            className="rounded border border-border bg-background px-2 py-1 text-xs font-medium text-foreground transition-all hover:bg-accent"
-                          >
-                            Cancelar
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setDeleteConfirmId(r.id)}
-                          className="flex items-center gap-2 text-xs text-destructive hover:underline font-medium"
-                        >
-                          <Trash2 className="h-3 w-3" /> Eliminar reserva
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <ReservationsPanel reservations={reservations} reload={reload} onEdit={startEdit} onDelete={del} />
         </div>
 
         <SystemStatus data={data} loading={loading} />
